@@ -1,17 +1,28 @@
-name: Build
+name: FCDE Demo Build
 
 on: [push]
 
 jobs:
+
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
     steps:
       - uses: actions/checkout@v3
-      - name: Install CMake
-        run: sudo apt-get install cmake
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
       - name: Build
-        run: |
-          mkdir build
-          cd build
-          cmake ..
-          make
+        run: cmake --build build
+
+  test:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: After build step
+        run: echo "Sequential job executed after build"
